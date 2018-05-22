@@ -15,7 +15,9 @@
 
   https://docs.microsoft.com/en-us/powershell/module/powershellget/update-module?view=powershell-6
 .EXAMPLE
-  azr-vmss
+  .\azr-vmss-runcommand
+  
+  Follow prompts
   
 .Link
   https://github.com/racker/azr-vmss
