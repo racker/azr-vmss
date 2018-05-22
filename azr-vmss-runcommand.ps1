@@ -1,4 +1,4 @@
-#Requires -Version 5.0
+﻿#Requires -Version 5.0
 #Requires -Module AzureRM
 
 <#
@@ -15,9 +15,7 @@
 
   https://docs.microsoft.com/en-us/powershell/module/powershellget/update-module?view=powershell-6
 .EXAMPLE
-  .\azr-vmss-runcommand
-  
-  Follow prompts
+  azr-vmss-runcommand
   
 .Link
   https://github.com/racker/azr-vmss
@@ -605,6 +603,7 @@ Function Get-FileName($initialDirectory)
     
     $OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
     $OpenFileDialog.initialDirectory = $initialDirectory
+    $openFileDialog.Title = "Select the script you want to run"
     $OpenFileDialog.filter = "All Files (*.*)| *.*"
     $OpenFileDialog.ShowDialog() | Out-Null
     $OpenFileDialog.filename
@@ -651,7 +650,7 @@ $ShellScript =
 }
 
 #Added a Grid View to allow you to select the VMSS Instance you want to work with.
-$VMSS = Get-AzureRMVMSS | Out-GridView -Title "VMSS Instances" -PassThru
+$VMSS = Get-AzureRMVMSS | Out-GridView -Title "Select the VMSS deployment to run script against" -PassThru
 $VMSSvms = Get-AzureRmVmssVM -ResourceGroupName $VMSS.ResourceGroupName -VMScaleSetName $VMSS.Name
 $VMSSInstance = $VMSSvms.instanceID
 
@@ -678,12 +677,12 @@ foreach ($Instance in $VMSSInstance)
 
 #Check the array and see which one has data, if not then there is a mismatch on script against VMSS instance OS.
 if($LinuxList)
-{$LinuxList | Invoke-Parallel -ImportVariables -Throttle 50 -LogFile "P:\onedrive\Scripts\VMSSLogLinux.log"  -Scriptblock {
+{$LinuxList | Invoke-Parallel -ImportVariables -Throttle 50 -Scriptblock {
             $result = Invoke-AzureRmResourceAction -ResourceId $_ -Action runCommand -Parameters $Shellscript -ApiVersion 2017-12-01 -Force 
             [void]$request.Add($result)            
             }}
 elseif($WindowsList)
-{$WindowsList | Invoke-Parallel -ImportVariables -Throttle 50 -LogFile "P:\onedrive\Scripts\VMSSLogWindows.log" -Scriptblock {
+{$WindowsList | Invoke-Parallel -ImportVariables -Throttle 50 -Scriptblock {
             $result = Invoke-AzureRmResourceAction -ResourceId $_ -Action runCommand -Parameters $Powershellscript -ApiVersion 2017-12-01 -Force
             [void]$request.Add($result)
             }}
